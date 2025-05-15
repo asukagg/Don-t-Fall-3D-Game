@@ -186,7 +186,8 @@ def update_game():
         dx = abs(player_pos[0] - spark[0] * PLATFORM_SIZE)
         dy = abs(player_pos[1] - spark[1] * PLATFORM_SIZE)
         if dx < 10 and dy < 10:
-            score += 10
+            score += 20 if GRID_SIZE == 4 else 10
+            #score += 10
             spark = None
 
     if portal:
@@ -204,7 +205,9 @@ def update_game():
         laser_timer = now
         laser_axis = random.randint(0, 1)  # 0 for X, 1 for Y
         laser_position = 0 
-        laser_direction = 1  
+        laser_direction = 1
+        global laser_speed
+        laser_speed = 0.15 if GRID_SIZE == 4 else 0.1  
     elif laser_active:
         # sweeping logic
         laser_position += laser_direction * laser_speed
@@ -235,8 +238,8 @@ def update_game():
         if len(spikes) < 5:  #5 spikes at a time
             while True:
                 sx, sy = random.randint(0, GRID_SIZE - 1), random.randint(0, GRID_SIZE - 1)
-                if platforms[sx][sy]:  # Only spawn on active platforms
-                    spikes.append((sx, sy, now, 0))  # New spike with height 0
+                if platforms[sx][sy]:  # active platforms
+                    spikes.append((sx, sy, now, 0))  # notun spike with height 0
                     break
         spike_timer = now
 
@@ -310,7 +313,8 @@ def timer(value):
     global red_tile, red_time, last_platform_timer
     if not game_over:
         update_game()
-        if time.time() - last_platform_timer > 5:
+        platform_timer_interval = 3 if GRID_SIZE == 4 else 5  
+        if time.time() - last_platform_timer > platform_timer_interval:
             while True:
                 i, j = random.randint(0, GRID_SIZE - 1), random.randint(0, GRID_SIZE - 1)
                 if platforms[i][j]:
@@ -343,7 +347,7 @@ def keyboard(key, x, y):
 def special_keys(key, x, y):
     global c_angle, c_radius, c_z
     if key == GLUT_KEY_LEFT:
-        c_angle += 5 
+        c_angle += 5
         c_angle %= 360
     elif key == GLUT_KEY_RIGHT:
         c_angle -= 5 
@@ -382,6 +386,7 @@ def reset_game(manual=False):
     laser_position = 0
     laser_direction = 1
     laser_axis = 0
+    laser_speed = 0.15 if GRID_SIZE == 4 else 0.1
     game_over = False
     spike_timer = time.time() 
     spikes = []  
